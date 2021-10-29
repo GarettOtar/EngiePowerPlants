@@ -12,8 +12,8 @@ def productionplan(request):
     powerplan_data = JSONParser().parse(request)
     powerplan_serilizer = Powerplan()
     if powerplan_serilizer.is_correct(powerplan_data):
-        powerplan_serilizer.execute(powerplan_data)
-        return JsonResponse({'foo': 'bar'}, status=status.HTTP_200_OK)
-#       return JsonResponse(powerplan_serilizer.execute, status=status.HTTP_200_OK)
-    return JsonResponse({'foo': 'bert'}, status=status.HTTP_400_BAD_REQUEST)
-#    return JsonResponse(powerplan_serilizer.errors, status=status.HTTP_400_BAD_REQUEST)
+        result = powerplan_serilizer.execute(powerplan_data)
+        if not result:
+            return JsonResponse({'Error': 'not enough power enable'}, status=status.HTTP_412_PRECONDITION_FAILED)
+        return JsonResponse(result, status=status.HTTP_200_OK)
+    return JsonResponse({'Error': 'bad request'}, status=status.HTTP_400_BAD_REQUEST)
