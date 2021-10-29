@@ -11,6 +11,7 @@ class Powerplan(serializers.Serializer):
 
     def rec_powerplant_aggregator(self, data, loadout, loadPrepared):
         selected_powerplant = None
+        diff = (data["load"] - loadPrepared)
         power_generated = 0
         for powerplant in data["powerplants"]:
             if selected_powerplant is None:
@@ -22,8 +23,17 @@ class Powerplan(serializers.Serializer):
                 if loadPrepared + power_generated > data['load']:
                     power_generated = data['load'] - loadPrepared
                 break
-
-
+            if diff < powerplant["pmax_load_value"]:
+                new_price = data["fuels"][FuelType.GAS.value] if powerplant["type"] is PowerplantType.GASFIRED.value else \
+                    data["fuels"][FuelType.GAS.value]
+                old_price = data["fuels"][FuelType.GAS.value] if selected_powerplant["type"] is \
+                                                                  PowerplantType.GASFIRED.value else\
+                    data["fuels"][FuelType.GAS.value]
+                if new_price * diff < old_price * diff:
+                    selected_powerplant = powerplant
+                power_generated = diff
+        if power_generated == 0:
+            power_generated = selected_powerplant["max_load_value"]
         loadout.append({"name": selected_powerplant["name"], "p": power_generated})
         data["powerplants"].pop(data["powerplants"].index(selected_powerplant))
         if loadPrepared == data['load']:
