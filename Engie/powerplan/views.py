@@ -15,5 +15,5 @@ def productionplan(request):
         result = powerplan_serilizer.execute(powerplan_data)
         if not result:
             return JsonResponse({'Error': 'not enough power enable'}, status=status.HTTP_412_PRECONDITION_FAILED)
-        return JsonResponse(result, status=status.HTTP_200_OK)
+        return JsonResponse(result, status=status.HTTP_200_OK, safe=False)
     return JsonResponse({'Error': 'bad request'}, status=status.HTTP_400_BAD_REQUEST)
